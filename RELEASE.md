@@ -19,4 +19,3 @@
    	1) 申请百度地图服务端应用。将获取到的appkey和secritKey配置到Config.json文件中。
    	2) 填写FileConsolidation.jar同目录下的Config.json文件。
 
-
