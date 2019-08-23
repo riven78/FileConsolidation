@@ -16,7 +16,8 @@ public class test {
 //        test2();
 //        test3();
 //        test4();
-        test5();
+//        test5();
+        test6();
     }
 
     public static void test1() {
@@ -125,7 +126,11 @@ public class test {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
 
+    public static void test6() {
+        String _duration = "123124122:";
+        System.out.println("_duration.matches(\"\\\\d+\")=" + _duration.matches("\\d+"));
 
     }
 }

@@ -215,6 +215,7 @@ public class FileInfo {
                             || directory.getName().equals("Photoshop")) {
                         fileType = FILE_TYPE_IMAGE;
                     } else if (directory.getName().equals("MP4")
+                            || directory.getName().equals("AVI")
                             || directory.getName().equals("QuickTime Video")) {
                         fileType = FILE_TYPE_VIDEO;
                     }
@@ -224,6 +225,13 @@ public class FileInfo {
                             if (exifModel == null || exifModel.length() == 0) {
                                 exifModel = tag.getDescription().trim().replaceAll(" ", "");
                             }
+                        } else if (tag.getTagName().equals("Detected MIME Type")) {
+                            String mimetype = tag.getDescription().trim();
+                            if (mimetype.startsWith("video/")) {
+                                fileType = FILE_TYPE_VIDEO;
+                            } else if (mimetype.startsWith("image/")) {
+                                fileType = FILE_TYPE_IMAGE;
+                            }
                         } else if (tag.getTagName().equals("Model")) {
                             exifModel = tag.getDescription().trim().replaceAll(" ", "");
                         } else if (tag.getTagName().equals("Date/Time Original")) {
@@ -231,13 +239,21 @@ public class FileInfo {
                             Date date = df.parse(tag.getDescription().trim());
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                             exifDate = sdf.format(date);
-                            exifDateLong = date.getTime();
+                            if (exifDate.startsWith("1904")) {
+                                exifDate = null;
+                            } else {
+                                exifDateLong = date.getTime();
+                            }
                         } else if (tag.getTagName().equals("Date/Time") && (exifDate == null || exifDate.length() == 0)) {
                             SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
                             Date date = df.parse(tag.getDescription().trim());
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                             exifDate = sdf.format(date);
-                            exifDateLong = date.getTime();
+                            if (exifDate.startsWith("1904")) {
+                                exifDate = null;
+                            } else {
+                                exifDateLong = date.getTime();
+                            }
                         } else if ((tag.getTagName().equals("Modification Time")
                                 || tag.getTagName().equals("Creation Time")
                                 || tag.getTagName().equals("File Modified Date"))
@@ -269,9 +285,21 @@ public class FileInfo {
                             Date date = df.parse(strTime);
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                             exifDate = sdf.format(date);
-                            exifDateLong = date.getTime();
+                            if (exifDate.startsWith("1904")) {
+                                exifDate = null;
+                            } else {
+                                exifDateLong = date.getTime();
+                            }
                         } else if (tag.getTagName().equals("Duration")) {
-                            duration = Long.valueOf(tag.getDescription().trim());
+                            String _duration = tag.getDescription().trim();
+                            if (_duration != null && _duration.matches("\\d+")) {
+                                duration = Long.valueOf(tag.getDescription().trim());
+                            } else if (_duration != null && _duration.matches("\\d{2}:\\d{2}:\\d{2}")) {
+                                String[] tmp = _duration.split(":");
+                                if (tmp != null && tmp.length == 3) {
+                                    duration = (Long.valueOf(tmp[0]) * 3600 + Long.valueOf(tmp[1]) * 60 + Long.valueOf(tmp[2])) * 1000;
+                                }
+                            }
                         } else if (tag.getTagName().equals("GPS Latitude")) {
                             Latitude = tag.getDescription().trim().replaceAll(" ", "");
                         } else if (tag.getTagName().equals("GPS Longitude")) {

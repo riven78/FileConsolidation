@@ -61,78 +61,79 @@ public class BaiduGps2City {
                     }
 //                System.out.println(url);
                     String result = HttpClient.doGet(url);
-                    String country = null;
-                    String province = null;
-                    String city = null;
-                    String district = null;
-                    if (result.startsWith("{")) {
-                        JSONObject json = new JSONObject(result);
-                        JSONObject _result = json.optJSONObject("result");
-                        if (_result != null) {
-                            JSONObject addressComponent = _result.optJSONObject("addressComponent");
-                            if (addressComponent != null) {
-                                country = addressComponent.optString("country");
-                                province = addressComponent.optString("province");
-                                city = addressComponent.optString("city");
-                                district = addressComponent.optString("district");
+                    if (result != null && result.length() > 0) {
+                        String country = null;
+                        String province = null;
+                        String city = null;
+                        String district = null;
+                        if (result.startsWith("{")) {
+                            JSONObject json = new JSONObject(result);
+                            JSONObject _result = json.optJSONObject("result");
+                            if (_result != null) {
+                                JSONObject addressComponent = _result.optJSONObject("addressComponent");
+                                if (addressComponent != null) {
+                                    country = addressComponent.optString("country");
+                                    province = addressComponent.optString("province");
+                                    city = addressComponent.optString("city");
+                                    district = addressComponent.optString("district");
+                                }
+                            }
+                        } else if (result.startsWith("[")) {
+                            JSONArray array = new JSONArray(result);
+                            if (array.length() > 0) {
+                                JSONObject obj = array.getJSONObject(0);
+                                country = obj.optString("country");
+                                province = obj.optString("province");
+                                city = obj.optString("city");
+                                district = obj.optString("district");
                             }
                         }
-                    } else if (result.startsWith("[")) {
-                        JSONArray array = new JSONArray(result);
-                        if (array.length() > 0) {
-                            JSONObject obj = array.getJSONObject(0);
-                            country = obj.optString("country");
-                            province = obj.optString("province");
-                            city = obj.optString("city");
-                            district = obj.optString("district");
-                        }
-                    }
 
-                    ArrayList<String> list = new ArrayList<>();
-                    if (district != null && district.length() > 0) {
-                        list.add(district);
-                    }
-                    if (city != null && city.length() > 0) {
-                        boolean found = false;
-                        for (String tmp : list) {
-                            if (found = tmp.equals(city)) {
-                                break;
+                        ArrayList<String> list = new ArrayList<>();
+                        if (district != null && district.length() > 0) {
+                            list.add(district);
+                        }
+                        if (city != null && city.length() > 0) {
+                            boolean found = false;
+                            for (String tmp : list) {
+                                if (found = tmp.equals(city)) {
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                list.add(0, city);
                             }
                         }
-                        if (!found) {
-                            list.add(0, city);
-                        }
-                    }
-                    if (province != null && province.length() > 0) {
-                        boolean found = false;
-                        for (String tmp : list) {
-                            if (found = tmp.equals(province)) {
-                                break;
+                        if (province != null && province.length() > 0) {
+                            boolean found = false;
+                            for (String tmp : list) {
+                                if (found = tmp.equals(province)) {
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                list.add(0, province);
                             }
                         }
-                        if (!found) {
-                            list.add(0, province);
-                        }
-                    }
-                    if (country != null && country.length() > 0 && !country.equals("中国")) {
-                        boolean found = false;
-                        for (String tmp : list) {
-                            if (found = tmp.equals(country)) {
-                                break;
+                        if (country != null && country.length() > 0 && !country.equals("中国")) {
+                            boolean found = false;
+                            for (String tmp : list) {
+                                if (found = tmp.equals(country)) {
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                list.add(0, country);
                             }
                         }
-                        if (!found) {
-                            list.add(0, country);
+                        if (list.size() > 0) {
+                            ret = new String[list.size()];
+                            for (int i = 0; i < list.size(); i++) {
+                                ret[i] = list.get(i);
+                            }
+                            list.clear();
                         }
                     }
-                    if (list.size() > 0) {
-                        ret = new String[list.size()];
-                        for (int i = 0; i < list.size(); i++) {
-                            ret[i] = list.get(i);
-                        }
-                        list.clear();
-                    }
-
 //                System.out.println(ret);
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
