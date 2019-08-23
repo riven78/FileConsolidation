@@ -71,7 +71,7 @@ public class DigestUtils {
         boolean ret = false;
         if (file1 != null && file2 != null && file1.exists()
                 && file1.isFile() && file2.exists() && file2.isFile()
-                && Math.max(file1.length(), file2.length()) / 2 > Math.min(file1.length(), file2.length())) {
+                && (Math.max(file1.length(), file2.length()) / 2) > Math.min(file1.length(), file2.length())) {
             try {
                 BufferedImage img1 = ImageIO.read(file1);
                 BufferedImage img2 = ImageIO.read(file2);
@@ -81,6 +81,7 @@ public class DigestUtils {
                     int scale2 = (int) ((double) img2.getWidth() / (double) img2.getHeight() * 100d);
                     if (scale1 == scale2) {
                         float percent = PhotoDigest.compare(img1, img2);
+                        System.out.println("percent :"+percent);
                         if (percent > 90.00f) {
                             ret = true;
                         }

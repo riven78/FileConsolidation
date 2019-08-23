@@ -235,24 +235,30 @@ public class FileInfo {
                         } else if (tag.getTagName().equals("Model")) {
                             exifModel = tag.getDescription().trim().replaceAll(" ", "");
                         } else if (tag.getTagName().equals("Date/Time Original")) {
-                            SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-                            Date date = df.parse(tag.getDescription().trim());
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-                            exifDate = sdf.format(date);
-                            if (exifDate.startsWith("1904")) {
-                                exifDate = null;
-                            } else {
-                                exifDateLong = date.getTime();
+                            String strTime = tag.getDescription().trim();
+                            if (strTime != null && strTime.matches("\\d{4}:\\d{2}:\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
+                                SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+                                Date date = df.parse(strTime);
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                                exifDate = sdf.format(date);
+                                if (exifDate.startsWith("1904")) {
+                                    exifDate = null;
+                                } else {
+                                    exifDateLong = date.getTime();
+                                }
                             }
                         } else if (tag.getTagName().equals("Date/Time") && (exifDate == null || exifDate.length() == 0)) {
-                            SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-                            Date date = df.parse(tag.getDescription().trim());
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-                            exifDate = sdf.format(date);
-                            if (exifDate.startsWith("1904")) {
-                                exifDate = null;
-                            } else {
-                                exifDateLong = date.getTime();
+                            String strTime = tag.getDescription().trim();
+                            if (strTime != null && strTime.matches("\\d{4}:\\d{2}:\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
+                                SimpleDateFormat df = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+                                Date date = df.parse(strTime);
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                                exifDate = sdf.format(date);
+                                if (exifDate.startsWith("1904")) {
+                                    exifDate = null;
+                                } else {
+                                    exifDateLong = date.getTime();
+                                }
                             }
                         } else if ((tag.getTagName().equals("Modification Time")
                                 || tag.getTagName().equals("Creation Time")
@@ -281,14 +287,16 @@ public class FileInfo {
                             strTime = strTime.replace("十月", "Oct");
                             strTime = strTime.replace("+08:00", "CST");
 
-                            SimpleDateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
-                            Date date = df.parse(strTime);
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-                            exifDate = sdf.format(date);
-                            if (exifDate.startsWith("1904")) {
-                                exifDate = null;
-                            } else {
-                                exifDateLong = date.getTime();
+                            if (strTime != null && strTime.matches("\\w{3} \\w{3} \\d{2} \\d{2}:\\d{2}:\\d{2} \\w{3} \\d{4}")) {
+                                SimpleDateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+                                Date date = df.parse(strTime);
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                                exifDate = sdf.format(date);
+                                if (exifDate.startsWith("1904")) {
+                                    exifDate = null;
+                                } else {
+                                    exifDateLong = date.getTime();
+                                }
                             }
                         } else if (tag.getTagName().equals("Duration")) {
                             String _duration = tag.getDescription().trim();
@@ -317,5 +325,9 @@ public class FileInfo {
             }
         }
         return ret;
+    }
+
+    public static void main(String[] args) {
+        new FileInfo(new File("D:\\新建文件夹\\[20190610].[IMG].[上海市,宝山区]\\IMG_20190610002308_iPhone6sPlus_上海市,宝山区.jpg"));
     }
 }
