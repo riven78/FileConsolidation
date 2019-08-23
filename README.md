@@ -1,3 +1,11 @@
+# FileConsolidation_1.0.0.1_1900823
+1.NEW FEATURE LIST：
+    1. 增添整理照片时自动判断删除缩略图保留原图功能。
+
+2.FIXED BUG LIST：
+    1. 修改一些文件类型识别出错问题。
+    2. 修改一些拍摄日期识别出错问题。
+
 # FileConsolidation_1.0.0.0_1900821
 1.NEW FEATURE LIST：<br>
   1) 整理数码设备拍摄的照片与视频文件。按照日期与GPS信息整理。<br>
