@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,7 +18,6 @@ public class FileInfo {
     public static final String FILE_TYPE_IMAGE = "image";
     public static final String FILE_TYPE_AUDIO = "audio";
     public static final String FILE_TYPE_VIDEO = "video";
-    public static final String FILE_TYPE_OTHER = "other";
 
     public String exifModel = "";
     public String exifDate = null;
@@ -82,6 +82,17 @@ public class FileInfo {
                         }
                     }
                 }
+            } else {
+                String[] _tmp = parentFolderName.split("\\]\\.\\[");
+                if (_tmp != null && _tmp.length == 4 && _tmp[3] != null && _tmp[3].length() > 1) {
+                    if (_tmp[3].endsWith("]")) {
+                        _tmp[3] = _tmp[3].substring(0, _tmp[3].length() - 1);
+                    }
+                    String[] tmp = _tmp[3].split(",");
+                    for (String tmp1 : tmp) {
+                        _description.add(tmp1);
+                    }
+                }
             }
             fileName = file.getName();
             fullPath = file.getAbsolutePath();
@@ -92,8 +103,6 @@ public class FileInfo {
                         || suffixName.equals("modd") || suffixName.equals("mp4")
                         || suffixName.equals("m4a")) {
                     fileType = FILE_TYPE_VIDEO;
-                } else if (fileType == null || fileType.length() == 0) {
-                    fileType = FILE_TYPE_OTHER;
                 }
             }
             if (Latitude != null && Latitude.length() > 0 && Longitude != null && Longitude.length() > 0) {
@@ -186,7 +195,7 @@ public class FileInfo {
                     description[i] = _description.get(i);
                 }
             }
-            if((fileType==null || fileType.length()==0) && suffixName.toLowerCase().equals("jpg")){
+            if ((fileType == null || fileType.length() == 0) && suffixName.toLowerCase().equals("jpg")) {
                 fileType = FILE_TYPE_IMAGE;
             }
         }
@@ -201,9 +210,12 @@ public class FileInfo {
             try {
                 Metadata metadata = ImageMetadataReader.readMetadata(file.getAbsoluteFile());
                 for (Directory directory : metadata.getDirectories()) {
-                    if (directory.getName().equals("JPEG")) {
+                    if (directory.getName().equals("JPEG")
+                            || directory.getName().contains("PNG")
+                            || directory.getName().equals("Photoshop")) {
                         fileType = FILE_TYPE_IMAGE;
-                    } else if (directory.getName().equals("MP4")) {
+                    } else if (directory.getName().equals("MP4")
+                            || directory.getName().equals("QuickTime Video")) {
                         fileType = FILE_TYPE_VIDEO;
                     }
                     for (Tag tag : directory.getTags()) {
@@ -226,10 +238,35 @@ public class FileInfo {
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                             exifDate = sdf.format(date);
                             exifDateLong = date.getTime();
-                        } else if ((tag.getTagName().equals("Modification Time") || tag.getTagName().equals("Creation Time"))
+                        } else if ((tag.getTagName().equals("Modification Time")
+                                || tag.getTagName().equals("Creation Time")
+                                || tag.getTagName().equals("File Modified Date"))
                                 && (exifDate == null || exifDate.length() == 0)) {
-                            SimpleDateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-                            Date date = df.parse(tag.getDescription().trim());
+                            String strTime = tag.getDescription().trim();
+                            strTime = strTime.replace("星期一", "Mon");
+                            strTime = strTime.replace("星期二", "Tue");
+                            strTime = strTime.replace("星期三", "Wed");
+                            strTime = strTime.replace("星期四", "Thu");
+                            strTime = strTime.replace("星期五", "Fri");
+                            strTime = strTime.replace("星期六", "Sat");
+                            strTime = strTime.replace("星期日", "Sun");
+
+                            strTime = strTime.replace("十一月", "Nov");
+                            strTime = strTime.replace("十二月", "Dec");
+                            strTime = strTime.replace("一月", "Jan");
+                            strTime = strTime.replace("二月", "Feb");
+                            strTime = strTime.replace("三月", "Mar");
+                            strTime = strTime.replace("四月", "Apr");
+                            strTime = strTime.replace("五月", "May");
+                            strTime = strTime.replace("六月", "Jun");
+                            strTime = strTime.replace("七月", "Jul");
+                            strTime = strTime.replace("八月", "Aug");
+                            strTime = strTime.replace("九月", "Sep");
+                            strTime = strTime.replace("十月", "Oct");
+                            strTime = strTime.replace("+08:00", "CST");
+
+                            SimpleDateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+                            Date date = df.parse(strTime);
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                             exifDate = sdf.format(date);
                             exifDateLong = date.getTime();
@@ -243,7 +280,7 @@ public class FileInfo {
                     }
                     if (directory.hasErrors()) {
                         for (String error : directory.getErrors()) {
-                            System.err.format("ERROR: %s", error);
+                            System.err.format("\nERROR: %s", error);
                         }
                     }
                 }

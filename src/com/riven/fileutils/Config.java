@@ -39,17 +39,17 @@ public class Config {
             e.printStackTrace();
         }
 
-        File file = new File("abc.txt");//绝对路径
-//      File file = new File("hello.html");//相对路径
-        try {
-            file.createNewFile();
-            BufferedWriter out = new BufferedWriter(new FileWriter(file));
-            out.write(baiduAppKey);
-            out.flush(); // 把缓存区内容压入文件
-            out.close(); // 最后记得关闭文件
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        File file = new File("abc.txt");//绝对路径
+////      File file = new File("hello.html");//相对路径
+//        try {
+//            file.createNewFile();
+//            BufferedWriter out = new BufferedWriter(new FileWriter(file));
+//            out.write(baiduAppKey);
+//            out.flush(); // 把缓存区内容压入文件
+//            out.close(); // 最后记得关闭文件
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
     }
 }

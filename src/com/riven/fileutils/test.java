@@ -1,5 +1,11 @@
 package com.riven.fileutils;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,7 +15,8 @@ public class test {
 //        test1();
 //        test2();
 //        test3();
-        test4();
+//        test4();
+        test5();
     }
 
     public static void test1() {
@@ -83,5 +90,42 @@ public class test {
                 System.out.println("matcher2.group(" + i + ")=" + matcher2.group(i));
             }
         }
+    }
+
+    public static void test5() {
+        String strTime = "星期一 十月 24 22:56:30 +08:00 2016";
+        strTime = strTime.replace("星期一", "Mon");
+        strTime = strTime.replace("星期二", "Tue");
+        strTime = strTime.replace("星期三", "Wed");
+        strTime = strTime.replace("星期四", "Thu");
+        strTime = strTime.replace("星期五", "Fri");
+        strTime = strTime.replace("星期六", "Sat");
+        strTime = strTime.replace("星期日", "Sun");
+
+        strTime = strTime.replace("一月", "Jan");
+        strTime = strTime.replace("二月", "Feb");
+        strTime = strTime.replace("三月", "Mar");
+        strTime = strTime.replace("四月", "Apr");
+        strTime = strTime.replace("五月", "May");
+        strTime = strTime.replace("六月", "Jun");
+        strTime = strTime.replace("七月", "Jul");
+        strTime = strTime.replace("八月", "Aug");
+        strTime = strTime.replace("九月", "Sep");
+        strTime = strTime.replace("十月", "Oct");
+        strTime = strTime.replace("十一月", "Nov");
+        strTime = strTime.replace("十二月", "Dec");
+        strTime = strTime.replace("+08:00", "CST");
+
+        SimpleDateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+        System.out.println("new Date()=" + new Date());
+        try {
+            Date date = df.parse(strTime);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            System.out.println("matcher2.sdf.format(date)=" + sdf.format(date));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
     }
 }

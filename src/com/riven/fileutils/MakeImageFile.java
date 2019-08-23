@@ -18,7 +18,7 @@ public class MakeImageFile extends SwingWorker<Boolean, ProcessMsg> {
     private final ArrayList<File> folderList = new ArrayList<>();
     private int moveCount = 0;
     private int deleteCount = 0;
-    private final HashMap<String, FileEx> compareFiles = new HashMap<>();
+    //    private final HashMap<String, FileEx> compareFiles = new HashMap<>();
     private boolean stop = false;
 
     public MakeImageFile(File executeFolder, File saveFolder) {
@@ -34,7 +34,7 @@ public class MakeImageFile extends SwingWorker<Boolean, ProcessMsg> {
     protected Boolean doInBackground() throws Exception {
         Boolean ret = false;
         publish(new ProcessMsg(0, 0, "开始获取待文件......"));
-        compareFiles.clear();
+//        compareFiles.clear();
         fileList.clear();
         folderList.clear();
         moveCount = 0;
@@ -74,10 +74,9 @@ public class MakeImageFile extends SwingWorker<Boolean, ProcessMsg> {
                 File source = fileList.get(i);
                 FileInfo fileInfo = new FileInfo(source);
                 ProcessMsg msg = new ProcessMsg(i, fileList.size() + folderList.size(), null);
-                if (fileInfo.fileType != null && !fileInfo.fileType.equals(FileInfo.FILE_TYPE_OTHER)
+                if (fileInfo.fileType != null && fileInfo.fileType.length() > 0
                         && fileInfo.exifDate != null && fileInfo.exifDate.length() > 0) {
                     String saveFolderName = "[" + fileInfo.exifDate.substring(0, 8) + "]";
-
                     String found = null;
                     boolean hasChanged = false;
                     for (String tmp : saveFolderNameList) {
@@ -89,8 +88,7 @@ public class MakeImageFile extends SwingWorker<Boolean, ProcessMsg> {
                                     _tmp[1] = _tmp[1].substring(0, _tmp[1].length() - 1);
                                 }
                                 if ((fileInfo.fileType.equals(FileInfo.FILE_TYPE_IMAGE) && _tmp[1].equals("IMG"))
-                                        || (fileInfo.fileType.equals(FileInfo.FILE_TYPE_VIDEO) && _tmp[1].equals("MOV"))
-                                        || (fileInfo.fileType.equals(FileInfo.FILE_TYPE_OTHER) && _tmp[1].equals("OTH"))) {
+                                        || (fileInfo.fileType.equals(FileInfo.FILE_TYPE_VIDEO) && _tmp[1].equals("MOV"))) {
                                     String[] times = _tmp[0].split(",");
                                     SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
                                     long startTime = df.parse(times[0] + "000000").getTime();
@@ -128,8 +126,6 @@ public class MakeImageFile extends SwingWorker<Boolean, ProcessMsg> {
                         saveFolderName += ".[IMG]";
                     } else if (fileInfo.fileType.equals(FileInfo.FILE_TYPE_VIDEO)) {
                         saveFolderName += ".[MOV]";
-                    } else if (fileInfo.fileType.equals(FileInfo.FILE_TYPE_OTHER)) {
-                        saveFolderName += ".[OTH]";
                     }
                     String[] position = null;
                     String[] description = null;
@@ -268,32 +264,57 @@ public class MakeImageFile extends SwingWorker<Boolean, ProcessMsg> {
                     sourceFileName += "." + fileInfo.suffixName;
 
                     File dest = new File(destFolder.getAbsoluteFile(), sourceFileName);
-                    if (dest.exists()) {
-                        FileEx destComp = compareFiles.get(dest.getAbsolutePath());
-                        if (destComp == null) {
-                            destComp = new FileEx(dest);
-                            compareFiles.put(dest.getAbsolutePath(), destComp);
+                    File[] subfiles = destFolder.listFiles();
+                    if (subfiles != null && subfiles.length > 0) {
+                        for (File subFile : subfiles) {
+                            if (subFile.isFile()) {
+                                if (DigestUtils.equalFileContent(subFile, source)) {
+                                    String aa = subFile.getName().replaceAll("_\\d{13}.", ".");
+                                    if (aa.length() < sourceFileName.length()) {
+                                        msg.msg = String.format("[%s]目标目录中此文件已存在,但文件名信息缺乏，删除目标目录下文件。\nDelete %s is %s", source.toPath(), subFile.toPath(),
+                                                subFile.delete());
+                                        deleteCount++;
+                                        publish(msg);
+                                    } else {
+                                        CSVObject csvObject = new CSVObject();
+                                        csvObject.add("move");
+                                        csvObject.add("file");
+                                        csvObject.add(source.getAbsolutePath());
+                                        csvObject.add(dest.getAbsolutePath());
+                                        bw.write(csvObject.toString() + "\r\n");
+                                        hasWriteFile = true;
+                                        msg.msg = String.format("[%s]目标目录中此文件已存在。\nDelete %s is %s", source.toPath(), source.toPath(),
+                                                source.delete());
+                                        deleteCount++;
+                                        dest = null;
+                                    }
+                                    break;
+                                } else {
+                                    if (fileInfo.fileType.equals(FileInfo.FILE_TYPE_IMAGE)
+                                            && subFile.getName().substring(0, 18).equals(sourceFileName.substring(0, 18))
+                                            && DigestUtils.checkThumbnailOfEachOther(subFile, source)) {
+                                        if (subFile.length() < source.length()) {
+                                            msg.msg = String.format("[%s]目标目录中有此文件的缩略图，删除目标目录下缩略图文件。\nDelete %s is %s", source.toPath(), subFile.toPath(),
+                                                    subFile.delete());
+                                            deleteCount++;
+                                            publish(msg);
+                                        } else {
+                                            msg.msg = String.format("[%s]目标目录中有此文件的原图。\nDelete %s is %s", source.toPath(), source.toPath(),
+                                                    source.delete());
+                                            deleteCount++;
+                                            dest = null;
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        FileEx sourceComp = new FileEx(source);
-                        if (DigestUtils.equalFile(destComp, sourceComp)) {
-                            CSVObject csvObject = new CSVObject();
-                            csvObject.add("move");
-                            csvObject.add("file");
-                            csvObject.add(source.getAbsolutePath());
-                            csvObject.add(dest.getAbsolutePath());
-                            bw.write(csvObject.toString() + "\r\n");
-                            hasWriteFile = true;
-                            msg.msg = String.format("[%s]目标目录中此文件已存在。\nDelete %s is %s", source.toPath(), source.toPath(),
-                                    source.delete());
-                            deleteCount++;
-                            dest = null;
-                        } else {
+                    }
+                    if (dest != null) {
+                        if (dest.exists()) {
                             dest = new File(destFolder.getAbsoluteFile(),
                                     sourceFileName.substring(0, (sourceFileName.length() - ("." + fileInfo.suffixName).length()))
                                             + "_" + System.currentTimeMillis() + "." + fileInfo.suffixName);
                         }
-                    }
-                    if (dest != null) {
                         System.out.format("\nsource = %s;dest = %s", source.toPath(), dest.toPath());
                         CSVObject csvObject = new CSVObject();
                         csvObject.add("move");
@@ -340,7 +361,7 @@ public class MakeImageFile extends SwingWorker<Boolean, ProcessMsg> {
             }
             fileList.clear();
             folderList.clear();
-            compareFiles.clear();
+//            compareFiles.clear();
             saveFolderNameList.clear();
             publish(new ProcessMsg(100, 100, String.format("移动%d个文件，删除%d个文件和目录", moveCount, deleteCount)));
             ret = true;
@@ -368,7 +389,7 @@ public class MakeImageFile extends SwingWorker<Boolean, ProcessMsg> {
     protected void finalize() throws Throwable {
         fileList.clear();
         folderList.clear();
-        compareFiles.clear();
+//        compareFiles.clear();
     }
 
 }
