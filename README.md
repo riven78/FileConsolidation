@@ -1,3 +1,16 @@
+# FileConsolidation_1.0.0.3_1900828
+1.NEW FEATURE LIST：
+    优化调整了些获取地址信息以及短说明的方法。
+
+2.FIXED BUG LIST：
+
+# FileConsolidation_1.0.0.2_1900823
+1.NEW FEATURE LIST：
+
+2.FIXED BUG LIST：
+    1. 修改一些拍摄日期识别出错问题。
+
+
 # FileConsolidation_1.0.0.1_1900823
 1.NEW FEATURE LIST：
     1. 增添整理照片时自动判断删除缩略图保留原图功能。

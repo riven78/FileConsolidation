@@ -75,14 +75,15 @@ public class DigestUtils {
             try {
                 BufferedImage img1 = ImageIO.read(file1);
                 BufferedImage img2 = ImageIO.read(file2);
-                if (img1.getType() >= 0 && img2.getType() >= 0
+                if (img1 != null && img2 != null
+                        && img1.getType() >= 0 && img2.getType() >= 0
                         && img1.getWidth() != img2.getWidth()) {
                     int scale1 = (int) ((double) img1.getWidth() / (double) img1.getHeight() * 100d);
                     int scale2 = (int) ((double) img2.getWidth() / (double) img2.getHeight() * 100d);
                     if (scale1 == scale2) {
                         float percent = PhotoDigest.compare(img1, img2);
-                        System.out.println("percent :"+percent);
-                        if (percent > 90.00f) {
+                        System.out.println("percent :" + percent);
+                        if (percent > 80.00f) {
                             ret = true;
                         }
                     }

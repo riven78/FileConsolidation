@@ -12,18 +12,18 @@ import java.util.regex.Pattern;
 public class test {
 
     public static void main(String[] args) {
-//        test1();
+        test1();
 //        test2();
 //        test3();
 //        test4();
 //        test5();
-        test6();
+//        test6();
     }
 
     public static void test1() {
-        String parentFolderName = "20160625-29_长白山";
+        String parentFolderName = "MOV_20080531211842_161000_学翻身.jpg";
         Pattern pattern1 = Pattern
-                .compile("([\\w\\W]*)(?:(?:\\d{8}(?:-){1}\\d{2,4}){1}|(?:\\d{4}(?:-|[_/ ]){1}\\d{2}(?:-|[_/ ]){1}\\d{2}){1}|(?:\\d{8}){1})([\\w\\W]*)");
+                .compile("([\\u4e00-\\u9fa5]+[a-zA-Z\\u4e00-\\u9fa5]*)?[_\\- ]?(?:(?:\\d+[_\\-\\:\\/ ]{1}\\d+[_\\-\\:\\/ ]{1}\\d+(?:[_\\-\\:\\/ ]{1}\\d+[_\\-\\:\\/ ]{1}\\d+)?)|\\d{14}|\\d{8}|\\d{6})[_\\- ]?([\\u4e00-\\u9fa5]+[a-zA-Z0-9\\u4e00-\\u9fa5]*)?.[a-zA-Z0-9]+$");
         Matcher matcher1 = pattern1.matcher(parentFolderName);
         if (matcher1.find()) {
             String description = "";
